@@ -1,0 +1,9 @@
+path,exchange,symbol,base,quote,market_type,interval,start,end,rows,gaps,groups
+data/binance_linear_BTCUSDT_5m.parquet,binance,BTCUSDT,BTC,USDT,linear,5m,2020-09-02T02:40:00Z,2026-07-25T21:15:00Z,620000,0,Payments|mining-zone
+data/binance_linear_ETHUSDT_5m.parquet,binance,ETHUSDT,ETH,USDT,linear,5m,2020-09-02T02:40:00Z,2026-07-25T21:15:00Z,620000,0,Layer1_Layer2|pos|mining-zone
+data/binance_linear_SOLUSDT_5m.parquet,binance,SOLUSDT,SOL,USDT,linear,5m,2020-09-14T07:00:00Z,2026-07-25T21:15:00Z,616492,0,Layer1_Layer2|pos|mining-zone|Solana
+data/binance_linear_XRPUSDT_5m.parquet,binance,XRPUSDT,XRP,USDT,linear,5m,2020-09-02T02:40:00Z,2026-07-25T21:15:00Z,620000,0,Layer1_Layer2|Payments
+data/binance_spot_BTCUSDT_5m.parquet,binance,BTCUSDT,BTC,USDT,spot,5m,2020-09-01T02:45:00Z,2026-07-25T21:15:00Z,620000,287,Payments|mining-zone
+data/binance_spot_ETHUSDT_5m.parquet,binance,ETHUSDT,ETH,USDT,spot,5m,2020-09-01T02:45:00Z,2026-07-25T21:15:00Z,620000,287,Layer1_Layer2|pos|mining-zone
+data/binance_spot_SOLUSDT_5m.parquet,binance,SOLUSDT,SOL,USDT,spot,5m,2020-09-01T02:45:00Z,2026-07-25T21:15:00Z,620000,287,Layer1_Layer2|pos|mining-zone|Solana
+data/binance_spot_XRPUSDT_5m.parquet,binance,XRPUSDT,XRP,USDT,spot,5m,2020-09-01T02:45:00Z,2026-07-25T21:15:00Z,620000,287,Layer1_Layer2|Payments
