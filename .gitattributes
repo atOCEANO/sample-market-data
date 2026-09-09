@@ -1,0 +1,6 @@
+# Normalize all text to LF in the repository and on checkout, so a clone reads the
+# same on every platform rather than however the cloning machine is configured.
+* text=auto eol=lf
+
+# The dataset itself: never touch these bytes.
+*.parquet binary
