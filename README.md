@@ -75,7 +75,7 @@ Or clone the lot (~170 MB) and read locally: `pd.read_parquet("data/binance_spot
 
 ## Inside a File
 
-Seven columns, exactly what the router's SDK returns for candles, in order:
+Seven columns: the six the SDK returns for candles, plus its index flattened into a `timestamp` column, in this order:
 
 | column     | dtype   | unit                         | meaning |
 | :--------- | :------ | :--------------------------- | :------ |
@@ -87,11 +87,11 @@ Seven columns, exactly what the router's SDK returns for candles, in order:
 | volume     | float64 | base currency                | traded volume over the bar |
 | volume_usd | float64 | quote currency (USDT)        | volume as USDT notional (volume x close) |
 
-UTC throughout. Rows are sorted, unique and never forward-filled, so real gaps stay visible: 287 in every spot file from exchange halts, none in the perps. They sit at the same bars on every machine, which is half of why this works as a fixture, since a loader that mishandles a gap fails here the same way every time. The columns map straight onto `emsl.to_ohlcv`, which ignores `volume_usd`.
+UTC throughout. Rows are sorted, unique and never forward-filled, so real gaps stay visible: 287 missing bars in every spot file, none in the perps. They sit at the same bars on every machine, which is half of why this works as a fixture, since a loader that mishandles a gap fails here the same way every time. The columns map straight onto `emsl.to_ohlcv`, which ignores `volume_usd`.
 
 <br>
 <br>
 
 ## Provenance
 
-Pulled 2026-07-25 through [`exchange-router-service`](https://github.com/atOCEANO/exchange-router-service). **Each file is exactly what the SDK's `get_candles` returns**, not resampled or adjusted; only its per-query metadata (`df.attrs`) is left off, since a parquet row cannot carry it. Build against this and swap in the router with nothing in your loading code to change. It is a snapshot, not a feed: it does not update, which is the point.
+Pulled 2026-07-25 through [`exchange-router-service`](https://github.com/atOCEANO/exchange-router-service). **No price or volume is resampled or adjusted**: every value is the one the SDK returned. The frame around them differs in one way, and it is the line to know before you write a loader. The SDK hands back its bars on a UTC `DatetimeIndex`, which a parquet row cannot carry, so it was written out as the `timestamp` column above; its per-query metadata (`df.attrs`) is dropped for the same reason. So code written against these files reads `df["timestamp"]`, and the same code against a live router reads `df.index`. It is a snapshot, not a feed: it does not update, which is the point.
