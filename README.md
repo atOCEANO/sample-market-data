@@ -14,7 +14,7 @@
 
 `sample-market-data` is **a fixed set of Binance candles for testing infrastructure, not for research.** BTC, ETH, SOL and XRP, each as spot and USDT-perpetual (`linear`), 5-minute bars from September 2020 to July 2026, about 620,000 candles each. Eight parquet files and a CSV index.
 
-It exists so that code handling market data can be exercised where an exchange will not serve you. Exchanges geoblock by IP and much of the cloud is on that list, Colab and many CI runners included, so a live pull fails there; these files load from GitHub regardless. [`emsl`](https://github.com/atOCEANO/embeddable-market-simulation-library) draws every chart image in its documentation from one file here. It is a fixture.
+It exists so that code handling market data can be exercised where an exchange will not serve you. Exchanges geoblock by IP and much of the cloud is on that list, Colab and many CI runners included, so a live pull fails there; these files load from GitHub regardless. [`probatum`](https://github.com/atOCEANO/probatum) draws every chart image in its documentation from the spot files here. It is a fixture.
 
 <br>
 <br>
@@ -27,7 +27,7 @@ Nothing here should be used to fit or evaluate a strategy. Three reasons, none o
 - **It is closer to one series than to eight.** These four move together, and an asset's spot and perpetual move together almost exactly. A rule tested across all eight files has been tested about once.
 - **It is one frozen window.** The span never changes, so every run is against the same history, and no measurement taken inside the sample can tell you so. There is no held-out period here.
 
-For research, pull your own through [`exchange-router-service`](https://github.com/atOCEANO/exchange-router-service): the assets you actually mean to trade, including the ones that failed, over a window you did not choose after seeing it.
+For research, pull your own through [`exchange-router`](https://github.com/atOCEANO/exchange-router): the assets you actually mean to trade, including the ones that failed, over a window you did not choose after seeing it.
 
 <br>
 <br>
@@ -75,7 +75,7 @@ Or clone the lot (~170 MB) and read locally: `pd.read_parquet("data/binance_spot
 
 ## Inside a File
 
-Seven columns: the six the SDK returns for candles, plus its index flattened into a `timestamp` column, in this order:
+Seven columns: the six the SDK returned for candles when the files were pulled, plus its index flattened into a `timestamp` column, in this order:
 
 | column     | dtype   | unit                         | meaning |
 | :--------- | :------ | :--------------------------- | :------ |
@@ -87,11 +87,11 @@ Seven columns: the six the SDK returns for candles, plus its index flattened int
 | volume     | float64 | base currency                | traded volume over the bar |
 | volume_usd | float64 | quote currency (USDT)        | volume as USDT notional (volume x close) |
 
-UTC throughout. Rows are sorted, unique and never forward-filled, so real gaps stay visible: 287 missing bars in every spot file, none in the perps. They sit at the same bars on every machine, which is half of why this works as a fixture, since a loader that mishandles a gap fails here the same way every time. The columns map straight onto `emsl.to_ohlcv`, which ignores `volume_usd`.
+UTC throughout. Rows are sorted, unique and never forward-filled, so real gaps stay visible: 287 missing bars in every spot file, none in the perps. They sit at the same bars on every machine, which is half of why this works as a fixture, since a loader that mishandles a gap fails here the same way every time. The columns map straight onto `probatum.Data`, which ignores `volume_usd`.
 
 <br>
 <br>
 
 ## Provenance
 
-Pulled 2026-07-25 through [`exchange-router-service`](https://github.com/atOCEANO/exchange-router-service). **No price or volume is resampled or adjusted**: every value is the one the SDK returned. The frame around them differs in one way, and it is the line to know before you write a loader. The SDK hands back its bars on a UTC `DatetimeIndex`, which a parquet row cannot carry, so it was written out as the `timestamp` column above; its per-query metadata (`df.attrs`) is dropped for the same reason. So code written against these files reads `df["timestamp"]`, and the same code against a live router reads `df.index`. It is a snapshot, not a feed: it does not update, which is the point.
+Pulled 2026-07-25 through [`exchange-router`](https://github.com/atOCEANO/exchange-router). **No price or volume is resampled or adjusted**: every value is the one the SDK returned. The frame around them differs in one way, and it is the line to know before you write a loader. The SDK hands back its bars on a UTC `DatetimeIndex`, which a parquet row cannot carry, so it was written out as the `timestamp` column above; its per-query metadata (`df.attrs`) is dropped for the same reason. The files hold what the SDK returned when they were pulled: since 4.0 the router's candle frame adds a `closed` column and has `volume_notional` where these files have `volume_usd`, so code written against them does not run unchanged against a live router. It is a snapshot, not a feed: it does not update, which is the point.
